@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Internal
-    public void simpanFile(View view){
+    public void simpanFileIs(View view){
         String isiFile=editFile.getText().toString();
         File path=getDir("NEWFOLDER", MODE_PRIVATE);
         File file=new File(path.toString(),FILENAME);
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void bacaFile(View view){
+    public void bacaFileIs(View view){
         File path=getDir("NEWFOLDER", MODE_PRIVATE);
         File file=new File(path.toString(),FILENAME);
         if(file.exists()){
@@ -98,8 +99,58 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void hapusFile(View view){
+    public void hapusFileIs(View view){
         File path=getDir("NEWFOLDER", MODE_PRIVATE);
+        File file=new File(path.toString(),FILENAME);
+        if(file.exists()){
+            file.delete();
+        }
+
+    }
+
+    //Eksternal Storage
+    public void simpanFile(View view){
+        String isiFile=editFile.getText().toString();
+        File path= Environment.getExternalStorageDirectory();
+        File file=new File(path.toString(),FILENAME);
+        FileOutputStream outputStream=null;
+
+        try {
+            file.createNewFile();
+            outputStream=new FileOutputStream(file,false);
+            outputStream.write(isiFile.getBytes());
+            outputStream.flush();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void bacaFile(View view){
+        File path=Environment.getExternalStorageDirectory();
+        File file=new File(path.toString(),FILENAME);
+        if(file.exists()){
+            StringBuilder text=new StringBuilder();
+            try {
+                BufferedReader br=new BufferedReader(new FileReader(file));
+                String line=br.readLine();
+                while (line!=null){
+                    text.append(line);
+                    line=br.readLine();
+                }
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            textBaca.setText(text.toString());
+        } else {
+            textBaca.setText("");
+
+        }
+    }
+
+    public void hapusFile(View view){
+        File path=Environment.getExternalStorageDirectory();
         File file=new File(path.toString(),FILENAME);
         if(file.exists()){
             file.delete();
