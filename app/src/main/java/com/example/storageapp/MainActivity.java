@@ -1,8 +1,13 @@
 package com.example.storageapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -22,6 +27,11 @@ public class MainActivity extends AppCompatActivity {
     public static final String PREFNAME="com.example.storageapp";
     private TextView textBaca;
     private EditText editFile;
+    private static final String []PERMISSION={
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
+    private static final int REQUEST_CODE=100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,20 +120,35 @@ public class MainActivity extends AppCompatActivity {
 
     //Eksternal Storage
     public void simpanFile(View view){
-        String isiFile=editFile.getText().toString();
-        File path= Environment.getExternalStorageDirectory();
-        File file=new File(path.toString(),FILENAME);
-        FileOutputStream outputStream=null;
+        if (hasPermissions(this, PERMISSION)) {
+            String isiFile=editFile.getText().toString();
+            File path= Environment.getExternalStorageDirectory();
+            File file=new File(path.toString(),FILENAME);
+            FileOutputStream outputStream=null;
 
-        try {
-            file.createNewFile();
-            outputStream=new FileOutputStream(file,false);
-            outputStream.write(isiFile.getBytes());
-            outputStream.flush();
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                file.createNewFile();
+                outputStream=new FileOutputStream(file,false);
+                outputStream.write(isiFile.getBytes());
+                outputStream.flush();
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            ActivityCompat.requestPermissions(this,PERMISSION, REQUEST_CODE);
         }
+    }
+
+    private static boolean hasPermissions(Context context, String... permissions){ //cek sudah punya permission belum
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M && permissions!=null){
+            for(String permission:permissions){
+                if(ActivityCompat.checkSelfPermission(context,permission)!= PackageManager.PERMISSION_GRANTED){
+                    return false;
+                }
+            }
+        } return true;
     }
 
     public void bacaFile(View view){
